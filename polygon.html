@@ -69,7 +69,7 @@
                 // Add more headers if needed
             };
             // Fetching posts from the server
-            fetch('https://fastapiapp-production.up.railway.app/docs#/posts/query_advert_posts__get', {
+            fetch('https://fastapiapp-production.up.railway.app/docs/posts/query_advert', {
                 headers: headers
             }) // Assuming the endpoint is available at this URL
                 .then(response => {
@@ -140,7 +140,7 @@
                 return;
             }
 
-            fetch('https://fastapiapp-production.up.railway.app/docs#/polygon/create_polygon_polygon__post', {
+            fetch('https://fastapiapp-production.up.railway.app/docs/polygon/create_polygon', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -200,7 +200,7 @@
                 return;
             }
 
-            fetch('https://fastapiapp-production.up.railway.app/docs#/posts/advert_create_posts__post', {
+            fetch('https://fastapiapp-production.up.railway.app/docs/posts/advert_create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

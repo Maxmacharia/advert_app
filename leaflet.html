@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with CRUD Operations</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 5%;
+            text-align: center;
+        }
+        #container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+        #sidebar {
+            width: 300px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            overflow-y: auto;
+        }
+        .button {
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 style="font-size: 20px; margin: 0;">Leaflet Map App</h1>
+    <div id="userAccount" style="cursor: pointer;">
+        <img src="user-account-icon.png" alt="User Account Icon" style="width: 30px; height: 30px;">
+    </div>
+</header>
+
+<div id="container">
+    <div id="map"></div>
+
+    <div id="sidebar">
+        <h2>Polygon Operations</h2>
+        <button class="button" id="createPolygonBtn">Create Polygon</button>
+        <button class="button" id="updatePolygonBtn">Update Polygon</button>
+        <button class="button" id="deletePolygonBtn">Delete Polygon</button>
+
+        <h2>Post Operations</h2>
+        <div class="form-group">
+            <label for="postTitle">Title:</label>
+            <input type="text" id="postTitle">
+        </div>
+        <div class="form-group">
+            <label for="postContent">Content:</label>
+            <textarea id="postContent"></textarea>
+        </div>
+        <button class="button" id="createPostBtn">Create Post</button>
+        <button class="button" id="updatePostBtn">Update Post</button>
+        <button class="button" id="deletePostBtn">Delete Post</button>
+
+        <h2>Comments</h2>
+        <div class="form-group">
+            <label for="commentContent">Comment:</label>
+            <textarea id="commentContent"></textarea>
+        </div>
+        <button class="button" id="createCommentBtn">Create Comment</button>
+        <div id="commentsContainer"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Leaflet map initialization
+    var map = L.map('map').setView([51.505, -0.09], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+    var drawControl = new L.Control.Draw({
+      draw: {
+        polygon: true, // Enable polygon drawing
+        polyline: false,
+        rectangle: false,
+        circle: false,
+        marker: false,
+      },
+      edit: {
+        featureGroup: drawnItems
+      }
+    });
+    map.addControl(drawControl);
+
+    map.on('load',()=>{
+      const response= fetch('ht://127.0.0.1:8000/poly',{
+        method: 'GET',
+      });
+      if(response.status(200)){
+       console.log(response)
+      }
+    });
+    // Event listener for when a polygon is drawn
+    map.on('draw:created', function (event) {
+      var layer = event.layer;
+      drawnItems.addLayer(layer);
+
+      // Extracting the coordinates of the drawn polygon
+      var coordinates = layer.getLatLngs()[0].map(function(latlng) {
+        return [latlng.lat, latlng.lng];
+      });
+
+      // Log coordinates to console
+      console.log("Polygon Coordinates:", coordinates);
+    });
+
+    // Your Leaflet map polygon and popup configurations go here...
+
+    // Event listeners for polygon and post CRUD operations
+    document.getElementById('createPolygonBtn').addEventListener('click', function() {
+        // Show polygon creation form
+    });
+
+    document.getElementById('updatePolygonBtn').addEventListener('click', function() {
+        // Show polygon update form
+    });
+
+    document.getElementById('deletePolygonBtn').addEventListener('click', function() {
+        // Delete selected polygon
+    });
+
+    document.getElementById('createPostBtn').addEventListener('click', function() {
+        // Create post within selected polygon
+    });
+
+    document.getElementById('updatePostBtn').addEventListener('click', function() {
+        // Update selected post
+    });
+
+    document.getElementById('deletePostBtn').addEventListener('click', function() {
+        // Delete selected post
+    });
+
+    document.getElementById('createCommentBtn').addEventListener('click', function() {
+        // Create comment for selected post
+    });
+
+    // Functions to fetch and display comments
+    function fetchComments(postId) {
+        // Fetch comments for the specified post ID
+        // Display comments in the commentsContainer div
+    }
+
+    // Dummy function to handle user account click
+    document.getElementById('userAccount').addEventListener('click', function() {
+        alert('User Account Details');
+    });
+</script>
+
+</body>
+</html>
+

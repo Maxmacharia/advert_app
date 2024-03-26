@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Draw Polygon Example</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+</head>
+<header class="header" style="text-align: center;">TARGET ADVERTISING APP</header>
+<body>
+  <div id="map" style="width: 1300px; height: 600px;"></div>
+
+  <!-- Add a button for posting -->
+  <button onclick="enablePostMode()">Post</button>
+
+  <script>
+    var map = L.map('map').setView([-1.2921, 36.8219], 13); // Default to London coordinates
+
+    // Add OpenStreetMap as base layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Initialize the draw control and pass it to the map
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+    var drawControl = new L.Control.Draw({
+      draw: {
+        polygon: true, // Enable polygon drawing
+        polyline: false,
+        rectangle: false,
+        circle: false,
+        marker: false,
+      },
+      edit: {
+        featureGroup: drawnItems
+      }
+    });
+    map.addControl(drawControl);
+
+    var postMode = false;
+
+    // Function to enable post mode
+    function enablePostMode() {
+      postMode = true;
+    }
+
+    // Event listener for when a polygon is drawn
+    map.on('draw:created', function (event) {
+      var layer = event.layer;
+      drawnItems.addLayer(layer);
+
+      // Extracting the coordinates of the drawn polygon
+      var coordinates = layer.getLatLngs()[0].map(function(latlng) {
+        return [latlng.lat, latlng.lng];
+      });
+
+      // Log coordinates to console
+      console.log("Polygon Coordinates:", coordinates);
+
+      // Call function to create polygon on backend
+      createPolygonOnMap(coordinates);
+    });
+
+    // Event listener for clicking on the map
+    map.on('click', function (event) {
+      if (postMode) {
+        var lat = event.latlng.lat;
+        var lng = event.latlng.lng;
+
+        // Show a popup for posting
+        L.popup()
+          .setLatLng(event.latlng)
+          .setContent('<input type="text" id="postTitle" placeholder="Title"><br><textarea id="postContent" placeholder="Content"></textarea><br><button onclick="postInsidePolygon()">Post</button>')
+          .openOn(map);
+      }
+    });
+
+    // Function to create a polygon on the map and send to backend
+    function createPolygonOnMap(coordinates) {
+      fetch('http://127.0.0.1:8000/polygon', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ boundary: coordinates })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to create polygon');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Handle success
+        console.log('Polygon created:', data);
+      })
+      .catch(error => {
+        // Handle error
+        console.error('Error creating polygon:', error);
+      });
+    }
+
+    // Function to post inside a polygon
+    function postInsidePolygon() {
+      var title = document.getElementById('postTitle').value;
+      var content = document.getElementById('postContent').value;
+
+      // Check if title and content are not empty
+      if (title.trim() === '' || content.trim() === '') {
+        alert('Please provide title and content');
+        return;
+      }
+
+      // Fetch API to post inside polygon
+      fetch('http://127.0.0.1:8000/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title: title, content: content })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to post inside polygon');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Handle success
+        console.log('Posted inside polygon:', data);
+      })
+      .catch(error => {
+        // Handle error
+        console.error('Error posting inside polygon:', error);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with User Location and Posts</title>
+    <!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- Include Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map').setView([0, 0], 13); // Initial view with default location
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Function to set the map view to the user's location
+        function setViewToUserLocation() {
+            map.locate({setView: true, maxZoom: 16});
+        }
+
+        // Event listener to trigger setViewToUserLocation function when the page loads
+        window.onload = function() {
+            setViewToUserLocation();
+            fetchPosts(); // Fetch posts after setting the view to user location
+        };
+
+        // Function to add markers for each post to the map
+        function addMarkers(posts) {
+            posts.forEach(post => {
+                L.marker([post.latitude, post.longitude]).addTo(map)
+                    .bindPopup(`<b>${post.title}</b><br>${post.description}`);
+            });
+        }
+        function fetchPosts() {
+            fetch('/api/posts') // Assuming the endpoint is available at this URL
+                .then(response => response.json())
+                .then(posts => {
+                    addMarkers(posts);
+            })
+
+        // Function to fetch posts from the API endpoint
+        if (!jwtToken) {
+                alert('JWT token not found. Please login first.');
+                return;
+            }
+            fetchPosts()            
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create post');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Post created successfully:', data);
+                alert('Post created successfully');
+            })
+            .catch(error => {
+                console.error('Error creating post:', error);
+                alert('Failed to create post');
+            });
+        }
+
+        
+
+        // Event listener to trigger setViewToUserLocation function when the user clicks a button
+        document.getElementById('locate-button').onclick = setViewToUserLocation;
+    </script>
+
+    <!-- Button to trigger setViewToUserLocation function -->
+    <button id="locate-button">Locate Me</button>
+</body>
+</html>
