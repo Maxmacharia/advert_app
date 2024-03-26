@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
     formData.append('password', password);
 
     try {
-      const response = await fetch('https://fastapiapp-production.up.railway.app/docs/login', {
+      const response = await fetch('https://fastapiapp-production.up.railway.app/docs#/login', {
           method: 'POST',
           body: formData,
       });
@@ -58,7 +58,7 @@ function getToken() {
 }
 
 // Function to fetch data with JWT token
-url = 'https://fastapiapp-production.up.railway.app/docs/login'
+url = 'https://fastapiapp-production.up.railway.app/docs#/login'
 async function fetchData(url) {
     const token = getToken();
     if (!token) {
@@ -67,7 +67,7 @@ async function fetchData(url) {
     }
 
     try {
-        const response = await fetch('https://fastapiapp-production.up.railway.app/docs/login', {
+        const response = await fetch('https://fastapiapp-production.up.railway.app/docs#/login', {
             headers: {
                 'Authorization': `Bearer ${token}` // Set token in Authorization header
             }
