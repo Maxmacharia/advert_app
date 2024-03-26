@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advert app</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet.draw CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet.draw JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <style>
+        #map {
+            height: 550px;
+            width: 100%;
+        }
+        #head{
+            text-align: center;
+            background-color: #FFFFEE;
+            color: black;
+        }
+    </style>
+</head>
+<nav id = "head"><h1>ADVERTISING PLATFORM</h1></nav>
+<body>
+    <div id="map"></div>
+    <button onclick="submitPolygon()">Submit Polygon</button>
+    <button onclick="addPost()">Add Post</button>
+    <button id="locate-button">Locate Me</button>
+
+    <script>
+        var map = L.map('map').setView([0, 0], 13); // Initial view with default location
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Function to add markers for each post to the map
+        function addMarkers(posts) {
+            posts.forEach(post => {
+                L.marker([post.latitude, post.longitude]).addTo(map)
+                    .bindPopup(`<b>${post.title}</b><br>${post.content}`);
+            });
+        }
+        // Function to set the map view to the user's location
+        function setViewToUserLocation() {
+            map.locate({setView: true, maxZoom: 16});
+        }
+
+        // Event listener to trigger setViewToUserLocation function when the user clicks a button
+        document.getElementById('locate-button').onclick = setViewToUserLocation;
+
+        // Fetch JWT token from localStorage
+        var jwtToken = localStorage.getItem('token');
+        console.log('Token stored successfully:', jwtToken);
+
+        if (!jwtToken) {
+            alert('JWT token not found. Please login first.');
+        }
+
+        function fetchPosts() {
+            // Fetching posts from the server
+            var headers = {
+                'Authorization': 'Bearer ' + jwtToken, // Assuming JWT token is used for authorization
+                'Content-Type': 'application/json'
+                // Add more headers if needed
+            };
+            // Fetching posts from the server
+            fetch('https://fastapiapp-production.up.railway.app/docs#/posts/query_advert_posts__get', {
+                headers: headers
+            }) // Assuming the endpoint is available at this URL
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch posts');
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    addMarkers(posts);
+                })
+                .catch(error => {
+                    console.error('Error fetching posts:', error);
+                    alert('Failed to fetch posts');
+                })
+
+        }
+        // Event listener to trigger setViewToUserLocation function when the page loads
+        window.onload = function() {
+            setViewToUserLocation();
+            fetchPosts(); // Fetch posts after setting the view to user location
+        };
+
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        var drawControl = new L.Control.Draw({
+            draw: {
+                polygon: true,
+                polyline: false,
+                rectangle: false,
+                circle: false,
+                circlemarker: false,
+                marker: false
+            },
+            edit: {
+                featureGroup: drawnItems
+            }
+        });
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            var layer = event.layer;
+            drawnItems.addLayer(layer);
+        });
+
+        function submitPolygon() {
+            var layers = drawnItems.getLayers();
+            if (layers.length === 0) {
+                alert("Please draw a polygon first.");
+                return;
+            }
+
+            var coordinates = layers[0].getLatLngs()[0].map(function (latlng) {
+                return [latlng.lng, latlng.lat];
+            });
+
+            var polygonData = {
+                boundary: coordinates
+            };
+
+            // Fetch JWT token from localStorage
+            var jwtToken = localStorage.getItem('token');
+            console.log('Token stored successfully:', localStorage.getItem('token'));
+
+            if (!jwtToken) {
+                alert('JWT token not found. Please login first.');
+                return;
+            }
+
+            fetch('https://fastapiapp-production.up.railway.app/docs#/polygon/create_polygon_polygon__post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + jwtToken // Include JWT token in Authorization header
+                },
+                body: JSON.stringify(polygonData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create polygon');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Polygon created successfully:', data);
+                alert('Polygon created successfully');
+            })
+            .catch(error => {
+                console.error('Error creating polygon:', error);
+                alert('Failed to create polygon');
+            });
+        }
+        var clickedPoint = null;
+        var posts = [];
+
+        function addPost() {
+            if (!clickedPoint) {
+                alert("Please click on the map to select a location.");
+                return;
+            }
+
+            var postTitle = prompt("Enter post title:");
+            if (postTitle === null || postTitle.trim() === "") {
+                alert("Please enter a title for the post.");
+                return;
+            }
+
+            var postContent = prompt("Enter post content:");
+            if (postContent === null || postContent.trim() === "") {
+                alert("Please enter content for the post.");
+                return;
+            }
+
+            var post = {
+                    title: postTitle,
+                    content: postContent,
+                    latitude: clickedPoint.lat,
+                    longitude: clickedPoint.lng
+                };
+
+            // Fetch JWT token from localStorage
+            var jwtToken = localStorage.getItem('token');
+            console.log('Token stored successfully:', localStorage.getItem('token'));
+
+            if (!jwtToken) {
+                alert('JWT token not found. Please login first.');
+                return;
+            }
+
+            fetch('https://fastapiapp-production.up.railway.app/docs#/posts/advert_create_posts__post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + jwtToken // Include JWT token in Authorization header
+                },
+                body: JSON.stringify({
+                    title: postTitle,
+                    content: postContent,
+                    latitude: clickedPoint.lat,
+                    longitude: clickedPoint.lng
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create post');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Post created successfully:', data);
+                alert('Post created successfully');
+            })
+            .catch(error => {
+                console.error('Error creating post:', error);
+                alert('Failed to create post');
+            });
+
+                // Add post to the posts array
+                posts.push(post);
+
+                // Create a marker for the post
+                var marker = L.marker(clickedPoint).addTo(map);
+
+                // Store post title and content in the marker object
+                marker.postTitle = postTitle;
+                marker.postContent = postContent;
+                console.log(postTitle)
+                console.log(postContent)
+
+                // Add click event listener to the marker
+                marker.on('click', function (e) {
+                    console.log(e.target.postTitle)
+                    console.log(e.target.postContent)
+                    alert("Title: " + e.target.postTitle + "\nContent: " + e.target.postContent);
+                });
+
+
+                // Clear clickedPoint
+                clickedPoint = null;
+            }
+
+            map.on('click', function (e) {
+                console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng);
+                clickedPoint = e.latlng; // Store clicked point coordinates
+            });
+
+            map.on(L.Draw.Event.CREATED, function (event) {
+                var layer = event.layer;
+                drawnItems.addLayer(layer);
+            });
+
+    </script>
+</body>
+</html>

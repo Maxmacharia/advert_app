@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, 
+                         initial-scale=1.0">
+    <title>ADVERT_APP</title>
+    <link rel="stylesheet"
+          href="style.css">
+</head>
+ 
+<body>
+    <header>
+        <h1 class="heading">ADVERT APP</h1>
+        <h3 class="title">TARGET ADVERTISING APP</h3>
+    </header>
+ 
+    <!-- container div -->
+    <div class="container">
+ 
+        <!-- upper button section to select
+             the login or signup form -->
+        <div class="slider"></div>
+        <div class="btn">
+            <button class="login">Login</button>
+            <button class="signup">Signup</button>
+        </div>
+ 
+        <!-- Form section that contains the
+             login and the signup form -->
+        <div class="form-section">
+ 
+            <!-- login form -->
+            <form class="login-box" id = "login_form">
+                <input type="email"
+                       class="email ele"
+                       id="email_login"
+                       placeholder="youremail@email.com">
+                <input type="password"
+                       class="password ele"
+                       id = "password_login"
+                       placeholder="password">
+                <button class="clkbtn" type ="submit" id = "submit_login">Login</button>
+            </form>
+ 
+            <!-- signup form -->
+            <form class="signup-box" id = "signup_form">
+                <input type="text"
+                       class="name ele"
+                       id = "name"
+                       placeholder="username">
+                <input type="email"
+                       class="email ele"
+                       id = "email"
+                       placeholder="youremail@email.com">
+                <input type="password"
+                       class="password ele"
+                       id = "password"
+                       placeholder="password">
+                <input type="password"
+                       class="password ele"
+                       id = "confirm_password"
+                       placeholder="Confirm password">
+                <button class="clkbtn" type="submit" id="submit" >Signup</button>
+            </form>
+        </div>
+    </div>
+    <script src="javascript.js"></script>
+
+</body>
+</html>
