@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
           // Check if token is successfully stored
           if(localStorage.getItem('token')) {
               console.log('Token stored successfully:', localStorage.getItem('token'));
-              window.location.replace("https://github.com/Maxmacharia/advert_app/blob/master/polygon.html");
+              window.location.replace("https://maxmacharia.github.io/advert_app/polygon.html");
               console.log('logged in successfully!');
           } else {
               console.error('Error storing token.');
@@ -115,7 +115,7 @@ async function fetchData(url) {
           });
           console.log(response);
           if (response.ok) {
-              window.location.replace("https://github.com/Maxmacharia/advert_app/blob/master/polygon.html");
+              window.location.replace("https://maxmacharia.github.io/advert_app/polygon.html");
               console.log('Account created successfully!');
           } else {
               console.error('Error creating account:', response.statusText);
